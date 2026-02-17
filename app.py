@@ -45,7 +45,7 @@ def executar_rpa():
             
             print(f"Navegando para: {url_alvo}")
             page.goto(url_alvo)
-            
+            page.locator(".search-choice-close").click()
             print("Realizando o download...")
             with page.expect_download() as download_info:
                 page.get_by_title("Abrir em Excel").click()
