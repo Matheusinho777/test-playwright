@@ -33,9 +33,9 @@ def executar_rpa():
             print("Acessando o sistema...")
             page.goto("https://sharkcodersteste.sincelo.pt/login.php")
             page.get_by_role("textbox", name="Username").click()
-            page.get_by_role("textbox", name="Username").fill("{login}")
+            page.get_by_role("textbox", name="Username").fill({login})
             page.get_by_role("textbox", name="Password").click()
-            page.get_by_role("textbox", name="Password").fill("{password}")
+            page.get_by_role("textbox", name="Password").fill({password})
             page.get_by_role("button", name="Entrar").click()
             
             print(f"Navegando para: {url_alvo}")
