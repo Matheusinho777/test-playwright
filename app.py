@@ -10,9 +10,10 @@ def executar_rpa():
     # 1. Recebe os dados do corpo (body) da requisição enviada pelo n8n
     dados = request.json
     
-    # Validação de segurança básica
-    if not dados or 'data_inicio' not in dados or 'data_fim' or 'login' or 'password' not in dados:
-        return jsonify({"erro": "Faltam os parametros 'data_inicio' e/ou 'data_fim' e/ou 'login' e/ou 'password' no body"}), 400
+    # Validação de segurança básica corrigida
+    campos_obrigatorios = ['data_inicio', 'data_fim', 'login', 'password']
+    if not dados or not all(campo in dados for campo in campos_obrigatorios):
+        return jsonify({"erro": "Faltam parametros no body. Certifique-se de enviar data_inicio, data_fim, login e password"}), 400
 
     data_inicio = dados['data_inicio']
     data_fim = dados['data_fim']
@@ -32,10 +33,14 @@ def executar_rpa():
             
             print("Acessando o sistema...")
             page.goto("https://sharkcodersteste.sincelo.pt/login.php")
+            
+            # Usando as variáveis limpas para preencher o formulário
             page.get_by_role("textbox", name="Username").click()
-            page.get_by_role("textbox", name="Username").fill({login})
+            page.get_by_role("textbox", name="Username").fill(login)
+            
             page.get_by_role("textbox", name="Password").click()
-            page.get_by_role("textbox", name="Password").fill({password})
+            page.get_by_role("textbox", name="Password").fill(password)
+            
             page.get_by_role("button", name="Entrar").click()
             
             print(f"Navegando para: {url_alvo}")
