@@ -10,7 +10,7 @@ def executar_rpa():
     try:
         # Popen executa o seu robô em background (segundo plano).
         # Substitua "bot.py" pelo nome exato do ficheiro que tem o seu código do Playwright.
-        subprocess.Popen(["python", "bot.py"])
+        subprocess.Popen(["python", "teste2.py"])
         
         # Responde imediatamente ao n8n para não dar erro de "Timeout"
         return jsonify({"status": "sucesso", "mensagem": "Robô acionado e a iniciar o processo!"}), 200
