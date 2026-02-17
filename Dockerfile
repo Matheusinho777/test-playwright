@@ -13,4 +13,7 @@ COPY . .
 
 # Comando que o Railway vai rodar para iniciar o bot
 # Substitua "seu_script.py" pelo nome real do seu arquivo
-CMD ["python", "teste2.py"]
+
+# ... (tudo o resto mantém-se igual) ...
+# Mude apenas esta última linha:
+CMD ["python", "app.py"]
