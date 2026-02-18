@@ -81,13 +81,12 @@ def rpa_pendentes():
     
     try:
         with sync_playwright() as playwright:
-            # ATENÇÃO: Deixe headless=True no Railway!
             browser = playwright.chromium.launch(headless=True)
             context = browser.new_context()
             page = context.new_page()
             
             print("Acessando o sistema...")
-            page.goto("https://sharkcodersteste.sincelo.pt/login.php")
+            page.goto("https://sharkcodersteste.sincelo.pt/login.php", timeout=60000)
             
             # Login dinâmico usando o n8n
             page.get_by_role("textbox", name="Username").click()
@@ -98,38 +97,52 @@ def rpa_pendentes():
             
             page.get_by_role("button", name="Entrar").click()
 
-            print("Aguardando 1 segundos para a página carregar corretamente...")
-            page.wait_for_timeout(1000)
+            print("Aguardando carregamento pós-login...")
+            page.wait_for_timeout(2000) # Espera a dashboard carregar
             
             print("Navegando pelos menus...")
-            page.get_by_role("link", name=re.compile("Entidades", re.IGNORECASE)).click()
+            # Pega o PRIMEIRO link que contém "Entidades" (evita erro se houver mais de um)
+            link_entidades = page.locator("a", has_text=re.compile("Entidades", re.IGNORECASE)).first
+            link_entidades.wait_for(state="visible", timeout=15000)
+            link_entidades.click()
 
-            page.locator("#cartaoteclado").click()
-            print("Aguardando 3 segundos para a página carregar corretamente...")
+            print("Aguardando carregamento do menu entidades...")
             page.wait_for_timeout(2000)
+
+            # Se o #cartaoteclado falhar, tentaremos seguir sem ele
+            try:
+                cartaoteclado = page.locator("#cartaoteclado")
+                if cartaoteclado.is_visible(timeout=5000):
+                    cartaoteclado.click()
+            except Exception as e:
+                print("Elemento #cartaoteclado não encontrado ou desnecessário, prosseguindo...")
             
-            page.get_by_role("link", name=re.compile("Pendentes", re.IGNORECASE)).click()
+            print("Aguardando menu Pendentes...")
+            link_pendentes = page.locator("a", has_text=re.compile("Pendentes", re.IGNORECASE)).first
+            link_pendentes.wait_for(state="visible", timeout=15000)
+            link_pendentes.click()
             
             print("Aguardando 3 segundos para a página carregar corretamente...")
-            page.wait_for_timeout(2000)
+            page.wait_for_timeout(3000)
             
             print("Realizando o primeiro download (Resumo)...")
             with page.expect_download() as download_info:
-                page.get_by_title("Abrir em Excel").click()
+                # O botão de Excel também pode ser pego pelo texto se title falhar
+                page.locator("a", has_text=re.compile("Abrir em Excel", re.IGNORECASE)).first.click()
             download = download_info.value
             
             file_path_1 = "pendentes_resumo_temp.xls"
             download.save_as(file_path_1)
 
             print("Marcando a checkbox de linhas da fatura...")
-            page.get_by_role("checkbox", name="Mostra linhas da fatura no").check()
+            page.get_by_role("checkbox", name=re.compile("Mostra linhas", re.IGNORECASE)).first.check()
             
             # Uma pequena espera após marcar a caixa
             page.wait_for_timeout(1000)
             
             print("Realizando o segundo download (Detalhado)...")
             with page.expect_download() as download1_info:
-                page.get_by_title("Abrir em Excel").click()
+                page.locator("a", has_text=re.compile("Abrir em Excel", re.IGNORECASE)).first.click()
             download1 = download1_info.value
             
             file_path_2 = "pendentes_linhas_temp.xls"
@@ -158,7 +171,10 @@ def rpa_pendentes():
         return jsonify({"status": "sucesso", "mensagem": "Os DOIS arquivos foram extraídos e enviados ao webhook!"}), 200
 
     except Exception as e:
-        return jsonify({"status": "erro", "mensagem": str(e)}), 500
+        import traceback
+        erro_detalhado = traceback.format_exc()
+        print(f"ERRO CRÍTICO NO PLAYWRIGHT:\n{erro_detalhado}")
+        return jsonify({"status": "erro", "mensagem": str(e), "detalhes": erro_detalhado}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
