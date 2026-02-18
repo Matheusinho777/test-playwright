@@ -96,13 +96,18 @@ def rpa_pendentes():
             page.get_by_role("textbox", name="Password").fill(password)
             
             page.get_by_role("button", name="Entrar").click()
+
+            print("Aguardando 3 segundos para a página carregar corretamente...")
+            page.wait_for_timeout(3000)
             
             print("Navegando pelos menus...")
             page.get_by_role("link", name=" Entidades").click()
             
             # O gerador capturou dois cliques neste item, mantive apenas um para ser mais limpo e rápido,
             # mas se a interface for muito teimosa, você pode duplicar esta linha.
-            page.locator("#cartaoteclado").click() 
+            page.locator("#cartaoteclado").click()
+            print("Aguardando 3 segundos para a página carregar corretamente...")
+            page.wait_for_timeout(3000)
             
             page.get_by_role("link", name=" Pendentes").click()
             
