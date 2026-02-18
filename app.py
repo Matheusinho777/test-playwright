@@ -132,7 +132,7 @@ def rpa_pendentes():
             browser.close()
             
         # 5. Retorna sucesso para o nó HTTP Request inicial do n8n
-        return jsonify({"status": "sucesso", "mensagem": "Arquivo extraído e enviado ao webhook!"), 200
+        return jsonify({"status": "sucesso", "mensagem": "Arquivo extraído e enviado ao webhook!"}), 200
 
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
