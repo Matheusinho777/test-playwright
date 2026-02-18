@@ -101,7 +101,7 @@ def rpa_pendentes():
             page.wait_for_timeout(3000)
             
             print("Navegando pelos menus...")
-            page.get_by_role("link", name=" Entidades").click()
+            page.get_by_text("Entidades", exact=False).click()
             
             # O gerador capturou dois cliques neste item, mantive apenas um para ser mais limpo e rápido,
             # mas se a interface for muito teimosa, você pode duplicar esta linha.
@@ -109,7 +109,7 @@ def rpa_pendentes():
             print("Aguardando 3 segundos para a página carregar corretamente...")
             page.wait_for_timeout(3000)
             
-            page.get_by_role("link", name=" Pendentes").click()
+            page.get_by_text("Pendentes", exact=False).click()
             
             print("Aguardando 3 segundos para a página carregar corretamente...")
             page.wait_for_timeout(3000)
