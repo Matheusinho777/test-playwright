@@ -125,16 +125,17 @@ def rpa_pendentes():
             print("Aguardando 3 segundos para a página carregar corretamente...")
             page.wait_for_timeout(3000)
             
-            print("Realizando o primeiro download (Resumo)...")
+print("Realizando o primeiro download (Resumo)...")
             with page.expect_download() as download_info:
-                # O botão de Excel também pode ser pego pelo texto se title falhar
-                page.locator("a", has_text=re.compile("Abrir em Excel", re.IGNORECASE)).first.click()
+                # VOLTAMOS A USAR O TITLE (como no seu codegen), mas com suporte a regex para evitar quebra de case sensitive
+                page.get_by_title(re.compile("Abrir em Excel", re.IGNORECASE)).first.click()
             download = download_info.value
             
             file_path_1 = "pendentes_resumo_temp.xls"
             download.save_as(file_path_1)
 
             print("Marcando a checkbox de linhas da fatura...")
+            # Deixei a busca flexível para a checkbox
             page.get_by_role("checkbox", name=re.compile("Mostra linhas", re.IGNORECASE)).first.check()
             
             # Uma pequena espera após marcar a caixa
@@ -142,7 +143,8 @@ def rpa_pendentes():
             
             print("Realizando o segundo download (Detalhado)...")
             with page.expect_download() as download1_info:
-                page.locator("a", has_text=re.compile("Abrir em Excel", re.IGNORECASE)).first.click()
+                # Clica novamente no botão do Excel
+                page.get_by_title(re.compile("Abrir em Excel", re.IGNORECASE)).first.click()
             download1 = download1_info.value
             
             file_path_2 = "pendentes_linhas_temp.xls"
