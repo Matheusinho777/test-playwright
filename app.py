@@ -73,6 +73,8 @@ def executar_rpa():
 
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
+
+
 @app.route('/rpa-pendentes', methods=['POST'])
 def rpa_pendentes():
     # 1. Recebe os dados do corpo (body) da requisição enviada pelo n8n
@@ -132,6 +134,7 @@ def rpa_pendentes():
             browser.close()
             
         # 5. Retorna sucesso para o nó HTTP Request inicial do n8n
+        # CORREÇÃO: Faltava fechar as chaves '}' no dicionário JSON
         return jsonify({"status": "sucesso", "mensagem": "Arquivo extraído e enviado ao webhook!"}), 200
 
     except Exception as e:
