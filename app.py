@@ -1,3 +1,4 @@
+import re
 import os
 import requests
 from flask import Flask, request, jsonify
@@ -97,22 +98,20 @@ def rpa_pendentes():
             
             page.get_by_role("button", name="Entrar").click()
 
-            print("Aguardando 3 segundos para a página carregar corretamente...")
-            page.wait_for_timeout(3000)
+            print("Aguardando 1 segundos para a página carregar corretamente...")
+            page.wait_for_timeout(1000)
             
             print("Navegando pelos menus...")
-            page.get_by_text("Entidades", exact=False).click()
-            
-            # O gerador capturou dois cliques neste item, mantive apenas um para ser mais limpo e rápido,
-            # mas se a interface for muito teimosa, você pode duplicar esta linha.
+            page.get_by_role("link", name=re.compile("Entidades", re.IGNORECASE)).click()
+
             page.locator("#cartaoteclado").click()
             print("Aguardando 3 segundos para a página carregar corretamente...")
-            page.wait_for_timeout(3000)
+            page.wait_for_timeout(2000)
             
-            page.get_by_text("Pendentes", exact=False).click()
+            page.get_by_role("link", name=re.compile("Pendentes", re.IGNORECASE)).click()
             
             print("Aguardando 3 segundos para a página carregar corretamente...")
-            page.wait_for_timeout(3000)
+            page.wait_for_timeout(2000)
             
             print("Realizando o primeiro download (Resumo)...")
             with page.expect_download() as download_info:
