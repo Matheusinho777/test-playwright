@@ -8,7 +8,6 @@ app = Flask(__name__)
 
 @app.route('/executar-rpa', methods=['POST'])
 def executar_rpa():
-    # ... [O CÓDIGO DESTA ROTA CONTINUA EXATAMENTE IGUAL AO ANTERIOR] ...
     dados = request.json
     campos_obrigatorios = ['data_inicio', 'data_fim', 'login', 'password']
     if not dados or not all(campo in dados for campo in campos_obrigatorios):
@@ -98,10 +97,10 @@ def rpa_pendentes():
             page.get_by_role("button", name="Entrar").click()
 
             print("Aguardando carregamento pós-login...")
-            page.wait_for_timeout(2000) # Espera a dashboard carregar
+            page.wait_for_timeout(2000)
             
             print("Navegando pelos menus...")
-            # Pega o PRIMEIRO link que contém "Entidades" (evita erro se houver mais de um)
+            # Pega o PRIMEIRO link que contém "Entidades"
             link_entidades = page.locator("a", has_text=re.compile("Entidades", re.IGNORECASE)).first
             link_entidades.wait_for(state="visible", timeout=15000)
             link_entidades.click()
@@ -125,9 +124,9 @@ def rpa_pendentes():
             print("Aguardando 3 segundos para a página carregar corretamente...")
             page.wait_for_timeout(3000)
             
-print("Realizando o primeiro download (Resumo)...")
+            print("Realizando o primeiro download (Resumo)...")
             with page.expect_download() as download_info:
-                # VOLTAMOS A USAR O TITLE (como no seu codegen), mas com suporte a regex para evitar quebra de case sensitive
+                # VOLTAMOS A USAR O TITLE
                 page.get_by_title(re.compile("Abrir em Excel", re.IGNORECASE)).first.click()
             download = download_info.value
             
