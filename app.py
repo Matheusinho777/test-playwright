@@ -223,19 +223,15 @@ def rpa_unidades():
             page.wait_for_timeout(2000)
             
             print("Navegando pelos menus...")
-            # Pega o PRIMEIRO link que contém "Entidades"
-            link_entidades = page.locator("a", has_text=re.compile("Entidades", re.IGNORECASE)).first
-            link_entidades.wait_for(state="visible", timeout=15000)
-            link_entidades.click()
+            # Usando get_by_role para ignorar menus de telemóvel ocultos no HTML
+            page.get_by_role("link", name=re.compile("Entidades", re.IGNORECASE)).first.click()
 
             print("Aguardando carregamento do menu entidades...")
             page.wait_for_timeout(2000)
 
             print("Aguardando menu Lista...")
-            # Pega o PRIMEIRO link que contém "Lista" (para evitar o ícone )
-            link_lista = page.locator("a", has_text=re.compile("Lista", re.IGNORECASE)).first
-            link_lista.wait_for(state="visible", timeout=15000)
-            link_lista.click()
+            # Clica no menu Lista ignorando ícones e elementos invisíveis
+            page.get_by_role("link", name=re.compile("Lista", re.IGNORECASE)).first.click()
             
             print("Aguardando 3 segundos para a tabela carregar...")
             page.wait_for_timeout(3000)
@@ -243,8 +239,7 @@ def rpa_unidades():
             # Filtro da Tabela
             print("Preenchendo o filtro de Email...")
             try:
-                # Mantém o clique na célula do seu codegen caso seja necessário para ativar o filtro, 
-                # mas se falhar, o código não quebra e tenta ir direto pro texto.
+                # Mantém o clique na célula do seu codegen caso seja necessário
                 page.get_by_role("cell").nth(4).click(timeout=3000)
             except Exception:
                 pass
@@ -258,14 +253,13 @@ def rpa_unidades():
             
             print("Realizando o download da lista exportada...")
             with page.expect_download() as download_info:
-                # Busca pelo título do botão usando regex para máxima compatibilidade
+                # Busca pelo título do botão usando regex
                 page.get_by_title(re.compile("Exportar lista de entidades", re.IGNORECASE)).first.click()
             download = download_info.value
             
             file_path = "unidades_lista_temp.xls"
             download.save_as(file_path)
             
-            # Criei uma URL provisória baseada nas anteriores. Confirme se é este o endereço correto do Webhook no seu n8n!
             webhook_url = "https://n8n.erp24.pt/webhook/sharkcoders-lista-unidades" 
             print("Enviando arquivo para o n8n...")
             
