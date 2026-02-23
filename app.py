@@ -171,6 +171,14 @@ def rpa_pendentes():
             
         return jsonify({"status": "sucesso", "mensagem": "Os DOIS arquivos foram extraídos e enviados ao webhook!"}), 200
 
+    # Adicionado o except que estava faltando
+    except Exception as e:
+        import traceback
+        erro_detalhado = traceback.format_exc()
+        print(f"ERRO CRÍTICO NO PLAYWRIGHT:\n{erro_detalhado}")
+        return jsonify({"status": "erro", "mensagem": str(e), "detalhes": erro_detalhado}), 500
+
+
 @app.route('/rpa-unidades', methods=['POST'])
 def rpa_unidades():
     dados = request.json
