@@ -171,6 +171,111 @@ def rpa_pendentes():
             
         return jsonify({"status": "sucesso", "mensagem": "Os DOIS arquivos foram extraídos e enviados ao webhook!"}), 200
 
+@app.route('/rpa-unidades', methods=['POST'])
+def rpa_unidades():
+    dados = request.json
+    
+    campos_obrigatorios = ['login', 'password']
+    if not dados or not all(campo in dados for campo in campos_obrigatorios):
+        return jsonify({"erro": "Faltam parametros no body. Certifique-se de enviar login e password"}), 400
+
+    login = dados['login']
+    password = dados['password']
+    
+    try:
+        with sync_playwright() as playwright:
+            # ATENÇÃO: Deixe headless=True no Railway!
+            browser = playwright.chromium.launch(headless=True)
+            context = browser.new_context()
+            page = context.new_page()
+            
+            print("Acessando o sistema...")
+            page.goto("https://sharkcodersteste.sincelo.pt/login.php", timeout=60000)
+            
+            # Login dinâmico usando o n8n
+            page.get_by_role("textbox", name="Username").click()
+            page.get_by_role("textbox", name="Username").fill(login)
+            
+            page.get_by_role("textbox", name="Password").click()
+            page.get_by_role("textbox", name="Password").fill(password)
+            
+            # Tratamento inteligente para o Popup/Iframe
+            try:
+                print("Verificando se há popup/iframe para fechar...")
+                iframe_element = page.locator("#KlIFrameId")
+                if iframe_element.is_visible(timeout=5000):
+                    iframe_element.content_frame.locator("#close_button").click()
+                    print("Popup fechado com sucesso.")
+            except Exception as e:
+                print("Nenhum popup encontrado ou não foi necessário fechar. Seguindo em frente...")
+
+            page.get_by_role("button", name="Entrar").click()
+
+            print("Aguardando carregamento pós-login...")
+            page.wait_for_timeout(2000)
+            
+            print("Navegando pelos menus...")
+            # Pega o PRIMEIRO link que contém "Entidades"
+            link_entidades = page.locator("a", has_text=re.compile("Entidades", re.IGNORECASE)).first
+            link_entidades.wait_for(state="visible", timeout=15000)
+            link_entidades.click()
+
+            print("Aguardando carregamento do menu entidades...")
+            page.wait_for_timeout(2000)
+
+            print("Aguardando menu Lista...")
+            # Pega o PRIMEIRO link que contém "Lista" (para evitar o ícone )
+            link_lista = page.locator("a", has_text=re.compile("Lista", re.IGNORECASE)).first
+            link_lista.wait_for(state="visible", timeout=15000)
+            link_lista.click()
+            
+            print("Aguardando 3 segundos para a tabela carregar...")
+            page.wait_for_timeout(3000)
+            
+            # Filtro da Tabela
+            print("Preenchendo o filtro de Email...")
+            try:
+                # Mantém o clique na célula do seu codegen caso seja necessário para ativar o filtro, 
+                # mas se falhar, o código não quebra e tenta ir direto pro texto.
+                page.get_by_role("cell").nth(4).click(timeout=3000)
+            except Exception:
+                pass
+
+            input_email = page.get_by_role("textbox", name=re.compile("Email", re.IGNORECASE)).first
+            input_email.fill("@sharkcoders.pt")
+            input_email.press("Enter")
+            
+            print("Aguardando a tabela processar o filtro...")
+            page.wait_for_timeout(3000)
+            
+            print("Realizando o download da lista exportada...")
+            with page.expect_download() as download_info:
+                # Busca pelo título do botão usando regex para máxima compatibilidade
+                page.get_by_title(re.compile("Exportar lista de entidades", re.IGNORECASE)).first.click()
+            download = download_info.value
+            
+            file_path = "unidades_lista_temp.xls"
+            download.save_as(file_path)
+            
+            # Criei uma URL provisória baseada nas anteriores. Confirme se é este o endereço correto do Webhook no seu n8n!
+            webhook_url = "https://n8n.erp24.pt/webhook/sharkcoders-lista-unidades" 
+            print("Enviando arquivo para o n8n...")
+            
+            with open(file_path, "rb") as f:
+                files = {
+                    "arquivo_unidades": (file_path, f, "application/vnd.ms-excel")
+                }
+                response = requests.post(webhook_url, files=files)
+                
+            # Limpeza do servidor
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                
+            context.close()
+            browser.close()
+            
+        return jsonify({"status": "sucesso", "mensagem": "A lista foi extraída e enviada ao webhook!"}), 200
+
     except Exception as e:
         import traceback
         erro_detalhado = traceback.format_exc()
