@@ -9,14 +9,15 @@ app = Flask(__name__)
 @app.route('/executar-rpa', methods=['POST'])
 def executar_rpa():
     dados = request.json
-    campos_obrigatorios = ['data_inicio', 'data_fim', 'login', 'password']
+    campos_obrigatorios = ['data_inicio', 'data_fim', 'login', 'password', "webhook_destino"]
     if not dados or not all(campo in dados for campo in campos_obrigatorios):
-        return jsonify({"erro": "Faltam parametros no body. Certifique-se de enviar data_inicio, data_fim, login e password"}), 400
+        return jsonify({"erro": "Faltam parametros no body. Certifique-se de enviar data_inicio, data_fim, login, password e webhook_destino"}), 400
 
     data_inicio = dados['data_inicio']
     data_fim = dados['data_fim']
     login = dados['login']
     password = dados['password']
+    webhook_destino dados['webhook_destino']
 
     url_alvo = f"https://sharkcodersteste.sincelo.pt/index.php?m=faturacao&act=listarecibos&nomeCliente=&datainicioRecibo={data_inicio}&datafimRecibo={data_fim}"
     
@@ -48,7 +49,7 @@ def executar_rpa():
             file_path = "recibos_temp.xls"
             download.save_as(file_path)
             
-            webhook_url = "https://n8n.erp24.pt/webhook/sharkcoders-recibos-rpa"
+            webhook_url = (webhook_destino)
             print("Enviando arquivo para o n8n...")
             
             with open(file_path, "rb") as f:
