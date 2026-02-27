@@ -17,7 +17,7 @@ def executar_rpa():
     data_fim = dados['data_fim']
     login = dados['login']
     password = dados['password']
-    webhook_destino dados['webhook_destino']
+    webhook_destino = dados['webhook_destino']
 
     url_alvo = f"https://sharkcodersteste.sincelo.pt/index.php?m=faturacao&act=listarecibos&nomeCliente=&datainicioRecibo={data_inicio}&datafimRecibo={data_fim}"
     
