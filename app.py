@@ -19,7 +19,7 @@ def executar_rpa():
     password = dados['password']
     webhook_destino = dados['webhook_destino']
 
-    url_alvo = f"https://sharkcodersteste.sincelo.pt/index.php?m=faturacao&act=listarecibos&nomeCliente=&datainicioRecibo={data_inicio}&datafimRecibo={data_fim}"
+    url_alvo = f"https://sharkcoders.sincelo.pt/index.php?m=faturacao&act=listarecibos&nomeCliente=&datainicioRecibo={data_inicio}&datafimRecibo={data_fim}"
     
     try:
         with sync_playwright() as playwright:
@@ -86,7 +86,7 @@ def rpa_pendentes():
             page = context.new_page()
             
             print("Acessando o sistema...")
-            page.goto("https://sharkcodersteste.sincelo.pt/login.php", timeout=60000)
+            page.goto("https://sharkcoders.sincelo.pt/login.php", timeout=60000)
             
             # Login dinâmico usando o n8n
             page.get_by_role("textbox", name="Username").click()
@@ -199,7 +199,7 @@ def rpa_unidades():
             page = context.new_page()
             
             print("Acessando o sistema...")
-            page.goto("https://sharkcodersteste.sincelo.pt/login.php", timeout=60000)
+            page.goto("https://sharkcoder.sincelo.pt/login.php", timeout=60000)
             
             # Login dinâmico usando o n8n
             page.get_by_role("textbox", name="Username").click()
