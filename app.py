@@ -28,7 +28,7 @@ def executar_rpa():
             page = context.new_page()
             
             print("Acessando o sistema...")
-            page.goto("https://sharkcodersteste.sincelo.pt/login.php")
+            page.goto("https://sharkcoders.sincelo.pt/login.php")
             
             page.get_by_role("textbox", name="Username").click()
             page.get_by_role("textbox", name="Username").fill(login)
